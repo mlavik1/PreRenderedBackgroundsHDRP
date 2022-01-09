@@ -2,6 +2,7 @@
 *.sln
 *.suo
 *.vcxproj
+*.csproj
 *.cbp
 *.layout
 *.sdf

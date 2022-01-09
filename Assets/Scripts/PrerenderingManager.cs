@@ -7,7 +7,6 @@ using UnityEngine.Rendering.HighDefinition;
 [ExecuteInEditMode]
 public class PrerenderingManager : MonoBehaviour
 {
-    private string depthTexturePath = "/home/matias/test/img.png"; // TODO
     private CustomPassVolume customPassVolumeCached;
 
     private RenderTexture depthSaveRT;
@@ -28,7 +27,7 @@ public class PrerenderingManager : MonoBehaviour
         customPassVolume.customPasses?.Clear();
         customPassVolume.injectionPoint = CustomPassInjectionPoint.BeforeRendering;
 
-        byte[] bytes = System.IO.File.ReadAllBytes(depthTexturePath);
+        byte[] bytes = System.IO.File.ReadAllBytes(GetDepthTexturePath());
         Texture2D texture = new Texture2D(1, 1);
         ImageConversion.LoadImage(texture, bytes);
 
@@ -36,26 +35,31 @@ public class PrerenderingManager : MonoBehaviour
         depthReadPass.LoadDepthTexture(texture);
     }
 
+    public string GetDepthTexturePath()
+    {
+        return System.IO.Path.Combine(Application.temporaryCachePath, "prerendered-depth.png");
+    }
+
     private void OnDepthRendered(RenderTexture rt)
     {
-        Debug.Log("OnDepthRendered");
         depthSaveRT = rt;
     }
 
     private void FinaliseDepthSave()
     {
-        Debug.Log("FinaliseDepthSave");
         RenderTexture.active = depthSaveRT;
         Texture2D screenShot = new Texture2D(depthSaveRT.width, depthSaveRT.height, TextureFormat.RGB24, false);
         screenShot.ReadPixels(new Rect(0, 0, depthSaveRT.width, depthSaveRT.height), 0, 0); 
         RenderTexture.active = null; // JC: added to avoid errors 
         byte[] bytes = screenShot.EncodeToPNG(); 
-        System.IO.File.WriteAllBytes(depthTexturePath, bytes);
+        System.IO.File.WriteAllBytes(GetDepthTexturePath(), bytes);
 
         depthSaveRT = null;
 
         CustomPassVolume customPassVolume = GetCustomPassVolume();
         customPassVolume.customPasses?.Clear();
+
+        Debug.Log($"Depth texture saved to: {GetDepthTexturePath()}");
     }
 
     private CustomPassVolume GetCustomPassVolume()
