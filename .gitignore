@@ -1,0 +1,16 @@
+# file types
+*.sln
+*.suo
+*.vcxproj
+*.cbp
+*.layout
+*.sdf
+
+# folders
+Library
+Logs
+obj
+Temp
+UserSettings
+.vscode
+.vs
