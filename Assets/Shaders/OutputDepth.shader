@@ -9,7 +9,8 @@
 
     #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/RenderPass/CustomPass/CustomPassCommon.hlsl"
 
-    TEXTURE2D(_ImmediateTexture);
+    TEXTURE2D(_DepthTexture);
+    TEXTURE2D(_BackgroundTexture);
 
     float4 FullScreenPass(Varyings varyings, out float outputDepth : SV_Depth) : SV_Target
     {
@@ -19,10 +20,11 @@
         PositionInputs posInput = GetPositionInput(varyings.positionCS.xy, _ScreenSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V);
         
         float2 uv = posInput.positionNDC.xy * _RTHandleScale.xy;
-        float4 immediateColour = SAMPLE_TEXTURE2D_X_LOD(_ImmediateTexture, s_linear_clamp_sampler, uv, 0);
+        float4 depthColour = SAMPLE_TEXTURE2D_X_LOD(_DepthTexture, s_linear_clamp_sampler, uv, 0);
+        float4 backgroundColour = SAMPLE_TEXTURE2D_X_LOD(_BackgroundTexture, s_linear_clamp_sampler, uv, 0);
 
-        outputDepth = immediateColour.r;
-        return float4(1, 0, 0, 1);
+        outputDepth = depthColour.r;
+        return float4(backgroundColour.r, backgroundColour.g, backgroundColour.b, 0);
     }
 
     ENDHLSL

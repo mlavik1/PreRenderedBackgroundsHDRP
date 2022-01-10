@@ -28,16 +28,25 @@ public class PrerenderingManager : MonoBehaviour
         customPassVolume.injectionPoint = CustomPassInjectionPoint.BeforeRendering;
 
         byte[] bytes = System.IO.File.ReadAllBytes(GetDepthTexturePath());
-        Texture2D texture = new Texture2D(1, 1);
-        ImageConversion.LoadImage(texture, bytes);
+        Texture2D depthTexture = new Texture2D(1, 1);
+        ImageConversion.LoadImage(depthTexture, bytes);
+
+        bytes = System.IO.File.ReadAllBytes(GetBackgroundTexturePath());
+        Texture2D backgroundTexture = new Texture2D(1, 1);
+        ImageConversion.LoadImage(backgroundTexture, bytes);
 
         DepthReadPass depthReadPass = (DepthReadPass)customPassVolume.AddPassOfType<DepthReadPass>();
-        depthReadPass.LoadDepthTexture(texture);
+        depthReadPass.LoadDepthTexture(depthTexture, backgroundTexture);
     }
 
     public string GetDepthTexturePath()
     {
-        return System.IO.Path.Combine(Application.temporaryCachePath, "prerendered-depth.png");
+        return System.IO.Path.Combine(Application.streamingAssetsPath, "prerendered-depth.png");
+    }
+
+    public string GetBackgroundTexturePath()
+    {
+        return System.IO.Path.Combine(Application.streamingAssetsPath, "background.png");
     }
 
     private void OnDepthRendered(RenderTexture rt)

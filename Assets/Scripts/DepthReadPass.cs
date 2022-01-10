@@ -9,13 +9,15 @@ public class DepthReadPass : CustomPass
     private Shader outputDepthShader;
     private Material outputDepthMaterial;
 
-    private Texture2D loadedDepthTexture = null;
+    private Texture2D depthTexture = null;
+    private Texture2D backgroundTexture = null;
 
     protected override bool executeInSceneView => false;
 
-    public void LoadDepthTexture(Texture2D texture)
+    public void LoadDepthTexture(Texture2D depthTex, Texture2D bkgTex)
     {
-        loadedDepthTexture = texture;
+        depthTexture = depthTex;
+        backgroundTexture = bkgTex;
     }
 
     protected override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
@@ -28,7 +30,9 @@ public class DepthReadPass : CustomPass
 
     protected override void Execute(CustomPassContext ctx)
     {
-        ctx.propertyBlock.SetTexture("_ImmediateTexture", loadedDepthTexture);
+        //CoreUtils.ClearRenderTarget(ctx.cmd, ClearFlag.All, Color.black);
+        ctx.propertyBlock.SetTexture("_DepthTexture", depthTexture);
+        ctx.propertyBlock.SetTexture("_BackgroundTexture", backgroundTexture);
         CoreUtils.SetRenderTarget(ctx.cmd, ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ClearFlag.None);
         CoreUtils.DrawFullScreen(ctx.cmd, outputDepthMaterial, ctx.propertyBlock, shaderPassId: 0);
     }
