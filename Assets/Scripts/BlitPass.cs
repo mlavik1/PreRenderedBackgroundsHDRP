@@ -4,17 +4,17 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using UnityEditor; // TODO
 
-public class DepthReadPass : CustomPass
+public class BlitPass : CustomPass
 {
-    private Shader outputDepthShader;
-    private Material outputDepthMaterial;
+    private Shader shader;
+    private Material material;
 
     private Texture2D depthTexture = null;
     private Texture2D backgroundTexture = null;
 
     protected override bool executeInSceneView => false;
 
-    public void LoadDepthTexture(Texture2D depthTex, Texture2D bkgTex)
+    public void BlitTextures(Texture2D depthTex, Texture2D bkgTex)
     {
         depthTexture = depthTex;
         backgroundTexture = bkgTex;
@@ -22,23 +22,23 @@ public class DepthReadPass : CustomPass
 
     protected override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
     {
-        outputDepthShader = Shader.Find("Custom/OutputDepth");
-        outputDepthMaterial = CoreUtils.CreateEngineMaterial(outputDepthShader);
+        shader = Shader.Find("Custom/BlitPreRendered");
+        material = CoreUtils.CreateEngineMaterial(shader);
 
-        Debug.Assert(outputDepthMaterial != null, "Failed to create custom pass material");
+        Debug.Assert(material != null, "Failed to create custom pass material");
     }
 
     protected override void Execute(CustomPassContext ctx)
     {
-        //CoreUtils.ClearRenderTarget(ctx.cmd, ClearFlag.All, Color.black);
         ctx.propertyBlock.SetTexture("_DepthTexture", depthTexture);
         ctx.propertyBlock.SetTexture("_BackgroundTexture", backgroundTexture);
-        CoreUtils.SetRenderTarget(ctx.cmd, ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ClearFlag.None);
-        CoreUtils.DrawFullScreen(ctx.cmd, outputDepthMaterial, ctx.propertyBlock, shaderPassId: 0);
+        CoreUtils.SetRenderTarget(ctx.cmd, ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ClearFlag.All);
+        //CoreUtils.ClearRenderTarget(ctx.cmd, ClearFlag.All, Color.black);
+        CoreUtils.DrawFullScreen(ctx.cmd, material, ctx.propertyBlock, shaderPassId: 0);
     }
 
     protected override void Cleanup()
     {
-        CoreUtils.Destroy(outputDepthMaterial);
+        CoreUtils.Destroy(material);
     }
 }

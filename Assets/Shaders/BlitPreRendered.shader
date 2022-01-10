@@ -1,4 +1,4 @@
-﻿Shader "Custom/OutputDepth"
+﻿Shader "Custom/BlitPreRendered"
 {
     HLSLINCLUDE
 
@@ -24,7 +24,7 @@
         float4 backgroundColour = SAMPLE_TEXTURE2D_X_LOD(_BackgroundTexture, s_linear_clamp_sampler, uv, 0);
 
         outputDepth = depthColour.r;
-        return float4(backgroundColour.r, backgroundColour.g, backgroundColour.b, 0);
+        return float4(backgroundColour.r, backgroundColour.g, backgroundColour.b, 1);
     }
 
     ENDHLSL

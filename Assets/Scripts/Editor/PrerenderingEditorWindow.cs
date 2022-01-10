@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class PrerenderingEditorWindow : EditorWindow
 {
-    private PrerenderingManager prerenderingManager;
+    private PrerenderingCamera prerendCam;
 
     [MenuItem("Prerendered backgrounds/Prerendering editor")]
     static void Init()
@@ -16,23 +16,23 @@ public class PrerenderingEditorWindow : EditorWindow
 
     void OnGUI()
     {
-        if(prerenderingManager == null)
-            prerenderingManager = FindObjectOfType<PrerenderingManager>();
+        if(prerendCam == null)
+            prerendCam = FindObjectOfType<PrerenderingCamera>();
 
-        if(prerenderingManager == null)
+        if(prerendCam == null)
         {
-            GUILayout.Label("Your scene has no PrerenderingManager. Please add one.");
+            GUILayout.Label("Your scene has no PrerenderingCamera. Please add one.");
             return;
         }
 
         if(GUILayout.Button("Save depth to texture"))
         {
-            prerenderingManager.SaveDepthTexture();
+            prerendCam.PreRender();
         }
 
         if(GUILayout.Button("Load depth from texture"))
         {
-            prerenderingManager.LoadDepthTexture();
+            prerendCam.BlitPreRenderedTextures();
         }
     }
 }
