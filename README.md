@@ -14,6 +14,8 @@ This method has one obvious limitation: **The camera can't move!**. This was a t
 
 We pre-render (the background of) the scene once, and save the colour texture and depth texture to a file (stored in Assets/StreamingAssets/SceneName/CameraName). Artists can modify these textures (most interestingly the colour texture) before importing them again, to create interesting backgrounds. During gameplay, we import these textures and blit them to the main colour render target and depth render target. This ensures that any dynamic geometry rendered after this stage will naturally become a part of the scene (the depth will be respected).
 
+This is implemented using two CustomPass classes: [BlitPass](Assets/Scripts/BlitPass.cs) and [PreRenderPass](Assets/Scripts/PreRenderPass.cs)
+
 ## How to use the sample scene
 
 Open the sample scene for an example.
