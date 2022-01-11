@@ -4,6 +4,10 @@ using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using UnityEditor; // TODO
 
+/// <summary>
+/// CustomPass responsible for blitting the pre-rendered colour and depth textures
+///  to the main colour render target and depth render target.
+/// </summary>
 public class BlitPass : CustomPass
 {
     private Shader shader;
@@ -33,7 +37,6 @@ public class BlitPass : CustomPass
         ctx.propertyBlock.SetTexture("_DepthTexture", depthTexture);
         ctx.propertyBlock.SetTexture("_BackgroundTexture", backgroundTexture);
         CoreUtils.SetRenderTarget(ctx.cmd, ctx.cameraColorBuffer, ctx.cameraDepthBuffer, ClearFlag.None);
-        //CoreUtils.ClearRenderTarget(ctx.cmd, ClearFlag.All, Color.black);
         CoreUtils.DrawFullScreen(ctx.cmd, material, ctx.propertyBlock, shaderPassId: 0);
     }
 

@@ -3,6 +3,10 @@ using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
 using UnityEngine.Events;
 
+/// <summary>
+/// CustomPass responsible for pre-remdering the background scene.
+/// It will render the colour and depth to two separate render targets.
+/// </summary>
 public class PreRenderPass : CustomPass
 {
     private Shader shader;
@@ -37,10 +41,12 @@ public class PreRenderPass : CustomPass
 
     protected override void Execute(CustomPassContext ctx)
     {
+        // Pre-render scene depth.
         ctx.propertyBlock.SetTexture("_MainTexture", ctx.cameraDepthBuffer);
         CoreUtils.SetRenderTarget(ctx.cmd, depthRenderTarget, ClearFlag.Depth);
         CoreUtils.DrawFullScreen(ctx.cmd, material, ctx.propertyBlock, shaderPassId: 0);
 
+        // Pre-render scene colour.
         ctx.propertyBlock.SetTexture("_MainTexture", ctx.cameraColorBuffer);
         CoreUtils.SetRenderTarget(ctx.cmd, colourRenderTarget, ClearFlag.Color);
         CoreUtils.DrawFullScreen(ctx.cmd, material, ctx.propertyBlock, shaderPassId: 0);

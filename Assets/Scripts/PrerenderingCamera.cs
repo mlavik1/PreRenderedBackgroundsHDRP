@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
+/// <summary>
+/// A Camera used for pre-rendering the scene and displaying the pre-rendered textures at runtime.
+/// </summary>
 [RequireComponent(typeof(CustomPassVolume))]
 [RequireComponent(typeof(Camera))]
 [RequireComponent(typeof(Volume))]
