@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
 [RequireComponent(typeof(CustomPassVolume))]
 [RequireComponent(typeof(Camera))]
+[RequireComponent(typeof(Volume))]
 [ExecuteInEditMode]
 public class PrerenderingCamera : MonoBehaviour
 {
     private CustomPassVolume customPassVolumeCached;
     private Camera cameraCached;
+    private Volume volumeCached;
 
     private RenderTexture depthSaveRT;
     private RenderTexture colourSaveRT;
@@ -17,6 +20,45 @@ public class PrerenderingCamera : MonoBehaviour
     private string oldResPath = "";
 
     public void PreRender()
+    {
+        StartCoroutine(PreRenderCoroutine());
+    }
+
+    public void BlitPreRenderedTextures()
+    {
+        StartCoroutine(BlitCoroutine());
+    }
+
+    private IEnumerator PreRenderCoroutine()
+    {
+        SetObjectVisibilityByTag("PreRenderedGeometry", true);
+        SetObjectVisibilityByTag("DynamicGeometry", false);
+        // Disable volume that overrides exposure (we might want post-process effects when pre-rendering scene)
+        GetVolume().enabled = false;
+        yield return null;
+        PreRenderInternal();
+#if UNITY_EDITOR
+        // In editor the camera only renders on demand, so we may need to force it to render.
+        GetCamera().Render();
+#endif
+    }
+
+    private IEnumerator BlitCoroutine()
+    {
+        SetObjectVisibilityByTag("PreRenderedGeometry", false);
+        SetObjectVisibilityByTag("DynamicGeometry", true);
+        // Enable volume that overrides exposure, to prevent visual artifact.
+        // See https://codeberg.org/matiaslavik/PreRenderedBackgroundsHDRP/issues/2
+        GetVolume().enabled = true;
+        yield return null;
+        BlitPreRenderedTexturesInternal();
+#if UNITY_EDITOR
+        // In editor the camera only renders on demand, so we may need to force it to render.
+        GetCamera().Render();
+#endif
+    }
+
+    private void PreRenderInternal()
     {
         CustomPassVolume customPassVolume = GetCustomPassVolume();
         customPassVolume.customPasses?.Clear();
@@ -26,7 +68,7 @@ public class PrerenderingCamera : MonoBehaviour
         preRenderPass.PreRenderScene(OnDepthRendered);
     }
 
-    public void BlitPreRenderedTextures()
+    private void BlitPreRenderedTexturesInternal()
     {
         CustomPassVolume customPassVolume = GetCustomPassVolume();
         customPassVolume.customPasses?.Clear();
@@ -95,6 +137,25 @@ public class PrerenderingCamera : MonoBehaviour
             cameraCached = GetComponent<Camera>();
         }
         return cameraCached;
+    }
+
+    private Volume GetVolume()
+    {
+        if(cameraCached == null)
+        {
+            volumeCached = GetComponent<Volume>();
+        }
+        return volumeCached;
+    }
+
+    private void SetObjectVisibilityByTag(string tag, bool visibility)
+    {
+        GameObject[] objects = GameObject.FindObjectsOfType<GameObject>(true);
+        foreach(GameObject obj in objects)
+        {
+            if(obj.tag == tag)
+                obj.SetActive(visibility);
+        }
     }
 
     void Awake()

@@ -12,12 +12,12 @@ public class PrerenderingCameraEditor : Editor
     {
         prerendCam = (PrerenderingCamera)target;
 
-        if(GUILayout.Button("Save depth to texture"))
+        if(GUILayout.Button("Pre-render scene and save"))
         {
             prerendCam.PreRender();
         }
 
-        if(GUILayout.Button("Load depth from texture"))
+        if(GUILayout.Button("Load pre-rendered scene"))
         {
             prerendCam.BlitPreRenderedTextures();
         }
